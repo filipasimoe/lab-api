@@ -1,0 +1,40 @@
+POST http://localhost:3000/api/user/register
+Content-Type: application/json
+
+{
+    "email": "dasdsa@gmail.com",
+    "password": "testeteste",
+    "isAdmin": 0
+}
+
+###
+
+POST http://localhost:3000/api/user/login
+Content-Type: application/json
+
+{
+    "email": "filipa@gmail.com",
+    "password": "testeteste"
+}
+
+### 
+
+GET http://localhost:3000/api/posts
+Content-Type: application/json: auth-token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+
+###
+
+POST http://localhost:3000/api/researcher/add
+Content-Type: application/json
+
+{
+    "name": "daniela",
+    "photo": "testeteste",
+    "bio": "oioi",
+    "email": "teste@gmail.com"
+}
+
+###
+
+POST http://localhost:3000/api/researcher/info?email=teste@gmail.com
+Content-Type: application/json
