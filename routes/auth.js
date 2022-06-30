@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs/dist/bcrypt');
 const jwt = require('jsonwebtoken');
 const { registerValidation, loginValidation } = require('../validation');
 const mySQL = require('mysql');
+const cors = require('cors');
 
 const db = mySQL.createConnection({host: 'localhost', user: 'root', password: '', database: 'lab-app'});
 
@@ -31,55 +32,32 @@ router.post('/register', async (request, result) => {
                 "IDU": 0
             });
         }
-        else {
-            // If user doesn't exist, hash the password and insert user in db
-            bcrypt.genSalt(saltRounds, function(err, salt) {
-                bcrypt.hash(request.body.password, salt, function(err, hash) {
-                  let insertUser= "INSERT INTO users (email, password, isAdmin) Values ('" + request.body.email + "', '" + hash + "', '" + request.body.isAdmin + "');";
-                  
-                  db.query(insertUser, (err,res2) => {
-                        if(err) throw err;
-                        
-                        let getUserID = "SELECT IDU FROM users WHERE email='" + request.body.email + "';";
+        // If user doesn't exist, hash the password and insert user in db
+        bcrypt.genSalt(saltRounds, function(err, salt) {
+            bcrypt.hash(request.body.password, salt, function(err, hash) {
+                let insertUser= "INSERT INTO users (email, password, isAdmin) Values ('" + request.body.email + "', '" + hash + "', '" + request.body.isAdmin + "');";
+                
+                db.query(insertUser, (err,res2) => {
+                    if(err) throw err;
+                    
+                    let getUserID = "SELECT * FROM users WHERE email='" + request.body.email + "';";
 
-                        // Send the user ID in the result
-                        db.query(getUserID, (err, res3) => {
-                            result.send({
-                                "IDU": res3[0].IDU
-                            });
-                            
+                    // Send the user ID in the result
+                    db.query(getUserID, (err, res3) => {
+                        result.status(200).send({
+                            "IDU": res3[0].IDU,
+                            "email": res3[0].email
                         });
-
+                        
                     });
 
                 });
 
             });
-        }
+
+        });
+        
     });
-
-
-    /*
-    //Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
-    //Creating new user
-    const user = new User({
-        name: req.body.name,
-        email: req.body.email,
-        password: hashedPassword
-    });
-
-    try {
-        const savedUser = await user.save();
-        res.send({ user: user._id });
-    }
-    
-    catch(err) {
-        res.status(400).send(err);
-    }
-    */
 });
 
 /* Login user with email and password
@@ -87,7 +65,6 @@ router.post('/register', async (request, result) => {
     Returns IDU = 0 if error
 */
 router.post('/login', async (request, result) => {
-
     const {error} = loginValidation(request.body);
 
     if(error) return result.status(400).send(error.details[0].message);
@@ -98,28 +75,92 @@ router.post('/login', async (request, result) => {
     db.query(userExists, (err, queryRes) => {
         if(err) throw err;
 
-        // Compares request password with db password
-        bcrypt.compare(request.body.password, queryRes[0].password, function(err, compareRes) {
+        // If user not exists
+        if(queryRes.length == 0) {
+            result.status(400).send({
+                "message": "user not found"
+            });
+        }
+        else {
+            // Compares request password with db password
+            // TODO isto pode ficar logo entro de um if
+            bcrypt.compare(request.body.password, queryRes[0].password, function(err, compareRes) {
+                if(err) throw err;
+
+                // bcrypt returns true if the passwords match
+                if(!compareRes) {
+                    // IDU 0 means error with login
+                    // TODO substituir por mensagem tipo credenciais inválidas
+                    result.status(400).send({
+                        "message": "wrong credentials"
+                    });
+                }
+                else {
+                    // Create and assign token
+                    const token = jwt.sign({ _id: queryRes[0].IDU }, process.env.TOKEN_SECRET);
+
+                    // HTTP cookie cannot be accessed by the frontend, it works behind the scenes and it's more secure than sending the token directly
+                    result.cookie('jwt', token, {
+                        httpOnly: true,
+                        maxAge: 24 * 60 * 60 * 1000 // 1 day
+                    });
+
+                    result.status(200).send({
+                        "IDU": queryRes[0].IDU,
+                        "email": queryRes[0].email
+                    });
+                }            
+            });
+        }        
+    });
+});
+
+router.get('/user', async (request, result) => {
+    try {
+        const cookie = request.cookies['jwt'];
+
+        const claims = jwt.verify(cookie, process.env.TOKEN_SECRET);
+
+        // not authenticates
+        if(!claims) {
+            result.status(401).send({                       // 401 - unauthorized
+                "message": "unauthenticated"
+            });
+        }
+
+        let getUser = "SELECT * FROM users WHERE IDU='" + claims._id + "';";
+
+        db.query(getUser, (err, queryRes) => {
             if(err) throw err;
 
-            // bcrypt returns true if the passwords match
-            if(compareRes) {
-                //Create and assign token
-                const token = jwt.sign({ _id: queryRes[0].IDU }, process.env.TOKEN_SECRET);
-
-                result.status(200).header('auth-token', token).send({
-                    "IDU": queryRes[0].IDU
-                });
-            }
-            else{
-                // IDU 0 means error with login
+            // If user not exists
+            if(queryRes.length == 0) {
                 result.status(400).send({
-                    "IDU": 0
+                    "message": "user not found"
                 });
             }
-        });
-    });
 
+            result.send({
+                'IDU': queryRes[0].IDU,
+                'email': queryRes[0].email,
+                'isAdmin': queryRes[0].isAdmin
+            });
+        });
+    }
+    catch(e) {
+        result.status(401).send({                       // 401 - unauthorized
+            "message": "unauthenticated"
+        });
+    }
+});
+
+// Removes the cookie
+router.post('/logout', (request, response) => {
+    response.cookie('jwt', '', {maxAge: 0});
+
+    response.send({
+        'message': 'success'
+    }); 
 });
 
 module.exports = router;
