@@ -28,8 +28,8 @@ router.post('/register', async (request, result) => {
         // If user exists
         if(res.length > 0) {
             // IDU 0 means error with register
-            result.status(400).send({
-                "IDU": 0
+            result.status(401).send({
+                "message": "unauthorized"
             });
         }
         // If user doesn't exist, hash the password and insert user in db
@@ -77,7 +77,7 @@ router.post('/login', async (request, result) => {
 
         // If user not exists
         if(queryRes.length == 0) {
-            result.status(400).send({
+            result.status(404).send({
                 "message": "user not found"
             });
         }
@@ -91,7 +91,7 @@ router.post('/login', async (request, result) => {
                 if(!compareRes) {
                     // IDU 0 means error with login
                     // TODO substituir por mensagem tipo credenciais inválidas
-                    result.status(400).send({
+                    result.status(401).send({
                         "message": "wrong credentials"
                     });
                 }
