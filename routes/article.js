@@ -5,12 +5,14 @@ const mySQL = require('mysql');
 const db = mySQL.createConnection({host: 'localhost', user: 'root', password: '', database: 'lab-app'});
 
 // Add article to db. Returns Insert = 1 if successfull, Insert = 0 if not successfull
-router.post('/add', verify, (request, result) => {
+router.post('/add', (request, result) => {
     let title = request.body.title;
     let month = request.body.month;
     let year = request.body.year;
     let url = request.body.url;
+    let authors = request.body.authors;
     let email = request.body.email;
+    let context = request.body.context;
 
     // Get IDu from email
     let getIDU = "SELECT IDU from users WHERE email='" + email + "';";
@@ -21,7 +23,7 @@ router.post('/add', verify, (request, result) => {
         // If the email doesn't exist, returns Delete = 0
         if(iRes.length == 0) {
             result.status(400).send({
-                "Insert": 0
+                "message": "email doesn't exist"
             });      
         }
 
@@ -34,19 +36,53 @@ router.post('/add', verify, (request, result) => {
             // If the IDR doesn't exist, returns Delete = 0
             if(idrRes.length == 0) {
                 result.status(400).send({
-                    "Insert": 0
+                    "message": "researcher doesn't exist"
                 });      
             }
+            else {
+                let isTitle = "SELECT * FROM articles WHERE title='" + title + "';"
 
-            let insert = "INSERT INTO `articles`(`title`, `month`, `year`, `url`, `IDR`) VALUES ('" + title + "','" + month + "','" + year + "','" + url + "','" + idrRes[0].IDR + "');";
+                db.query(isTitle, (err, isTitleRes) => {
+                    if(err) throw err;
 
-            db.query(insert, (err, insertRes) => {
-                if(err) throw err;
-        
-                result.status(200).send({
-                    "Insert": 1
-                }); 
-            }); 
+                    if(isTitleRes.length > 0) {
+                        result.status(400).send({
+                            "message": "there's already a publication with that name"
+                        }); 
+                    }
+
+                    else {
+                        let insert = "INSERT INTO `articles`(`title`, `month`, `year`, `url`, `authors`, `context`) VALUES ('" + title  + "','" + month  + "','" + year  + "','" + url  + "','" + authors  + "','" + context  + "')"
+                    
+                        db.query(insert, (err, insertRes) => {
+                            if(err) throw err;
+                            
+                            let getIDA = "SELECT IDA FROM articles WHERE title='" + title + "';"
+
+                            db.query(getIDA, (err, idaRes) => {
+                                if(err) throw err;
+
+                                if(idaRes.length == 0) {
+                                    result.status(400).send({
+                                        "message": "error"
+                                    }); 
+                                }
+                                else {
+                                    let insert = "INSERT INTO `articleresearchers`(`IDR`, `IDA`) VALUES ('" + idrRes[0].IDR + "','" + idaRes[0].IDA + "')";
+
+                                    db.query(insert, (err, insertRes) => {
+                                        if(err) throw err;
+                                
+                                        result.status(200).send({
+                                            "Insert": 1
+                                        }); 
+                                    }); 
+                                }
+                            });
+                        });
+                    }
+                })
+            }
         });    
     });
 });
@@ -107,8 +143,8 @@ router.get('/info/:IDA', verify, (request, result) => {
 /*  Returns all articles
     Receives email
 */
-router.get('/all', verify, (request, result) => {
-    let getInfo = "SELECT * FROM articles;";
+router.get('/all', (request, result) => {
+    let getInfo = "SELECT articles.* FROM articles, articleresearchers, researchers WHERE articleresearchers.IDA = articles.IDA AND articleresearchers.IDR=researchers.IDR;";
 
     db.query(getInfo, (err, getRes) => {
         if(err) throw err;

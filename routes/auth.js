@@ -106,8 +106,10 @@ router.post('/login', async (request, result) => {
                     });
 
                     result.status(200).send({
+                        "message": "success",
                         "IDU": queryRes[0].IDU,
-                        "email": queryRes[0].email
+                        "email": queryRes[0].email,
+                        "isAdmin": queryRes[0].isAdmin
                     });
                 }            
             });
