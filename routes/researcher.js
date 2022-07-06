@@ -134,6 +134,34 @@ router.get('/info/:email', (request, result) => {
     
 });
 
+/*  Returns the information for one researcher
+    Receives email
+*/
+router.get('/info/id/:id', (request, result) => {
+    let IDU = request.params.id;
+
+    console.log(IDU)
+
+    let getInfo = "SELECT * FROM researchers WHERE IDU='" + IDU + "';";
+
+    db.query(getInfo, (err, getRes) => {
+
+        if(err) throw err;
+
+        if(getRes.length == 0) {
+            result.status(400).send({
+                "message": "no researcher with that IDU"
+            });      
+        }
+        else {
+
+            result.status(200).send(getRes);  
+        }
+    });
+});
+    
+
+
 /*  Returns all researchers
 */
 router.get('/all', (request, result) => {
