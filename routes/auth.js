@@ -11,7 +11,6 @@ let saltRounds = 10;
 
 /* Register user with email, password and isAdmin
     Returns IDU if successfull
-    Returns IDU = 0 if error
 */
 router.post('/register', async (request, result) => {
     //Validate data before adding user
@@ -62,7 +61,6 @@ router.post('/register', async (request, result) => {
 
 /* Login user with email and password
     Returns IDU if successfull
-    Returns IDU = 0 if error
 */
 router.post('/login', async (request, result) => {
     const {error} = loginValidation(request.body);
@@ -96,13 +94,14 @@ router.post('/login', async (request, result) => {
                     });
                 }
                 else {
+                    // JSON WEB TOKEN
                     // Create and assign token
                     const token = jwt.sign({ _id: queryRes[0].IDU }, process.env.TOKEN_SECRET);
 
                     // HTTP cookie cannot be accessed by the frontend, it works behind the scenes and it's more secure than sending the token directly
                     result.cookie('jwt', token, {
                         httpOnly: true,
-                        maxAge: 24 * 60 * 60 * 1000 // 1 day
+                        maxAge: 24 * 60 * 60 * 1000 // 1 day duration
                     });
 
                     result.status(200).send({
@@ -158,7 +157,7 @@ router.get('/user', async (request, result) => {
 
 // Removes the cookie
 router.post('/logout', (request, response) => {
-    response.cookie('jwt', '', {maxAge: 0});
+    response.cookie('jwt', '', {maxAge: 0}); // erasing the cookie means it lasts 0 
 
     response.send({
         'message': 'success'

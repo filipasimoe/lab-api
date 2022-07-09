@@ -54,35 +54,38 @@ router.post('/add', (request, result) => {
 });
 
 /*  Updates researcher info
-    Receives name, photo, bio, email
+    Receives name, photo, bio, id
     Email can't be changed
-    Returns Update = 1 if successfull, Update = 0 if not successfull
 */
 router.put('/edit', (request, result) => {
     let name = request.body.name;
-    let photo = request.body.photo;
     let bio = request.body.bio;
-    let email = request.body.email;
+    let id = request.body.IDU;
     let role = request.body.role;
 
-    let getIDU = "SELECT IDU from users WHERE email='" + email + "';";
+    let getIDU = "SELECT * from researchers WHERE IDU='" + id + "';";
 
     db.query(getIDU, (err, iRes) => {
         if(err) throw err;
-        // If the email doesn't exist, returns IDU = 0
+
+        // If the id doesn't exist, returns IDU = 0
         if(iRes.length == 0) {
             result.status(400).send({
-                "Update": 0
+                "message": "update failed"
             });      
         }
         else {
-            let update = "UPDATE `researchers` SET `name`='" + name + "',`photo`='" + photo + "',`bio`='" + bio + "', `role`='" + role + "' WHERE IDU='" + iRes[0].IDU + "';"
+            if(name == null) name = iRes[0].name;
+            if(bio == null) bio = iRes[0].bio;
+            if(role == null) role = iRes[0].role;
+
+            let update = "UPDATE `researchers` SET `name`='" + name + "',`bio`='" + bio + "', `role`='" + role + "' WHERE IDU='" + id + "';"
 
             db.query(update, (err, updateRes) => {
                 if(err) throw err;
 
                 result.status(200).send({
-                    "Update": 1
+                    "message": "data updated"
                 }); 
             });
         }
@@ -140,8 +143,6 @@ router.get('/info/:email', (request, result) => {
 router.get('/info/id/:id', (request, result) => {
     let IDU = request.params.id;
 
-    console.log(IDU)
-
     let getInfo = "SELECT * FROM researchers WHERE IDU='" + IDU + "';";
 
     db.query(getInfo, (err, getRes) => {
@@ -155,11 +156,10 @@ router.get('/info/id/:id', (request, result) => {
         }
         else {
 
-            result.status(200).send(getRes);  
+            result.status(200).send(getRes[0]);  
         }
     });
 });
-    
 
 
 /*  Returns all researchers
@@ -185,35 +185,46 @@ router.get('/all', (request, result) => {
 /*  Deletes the information for one researcher
     Receives email
 */
-router.delete('/delete', (request, result) => {
-    let email = request.body.email;
+router.delete('/delete/:id', (request, result) => {
+    let id = request.params.id;
 
-    let getIDU = "SELECT IDU from users WHERE email='" + email + "';";
+    let getIDR = "SELECT * from researchers WHERE IDU='" + id + "';";
 
-    db.query(getIDU, (err, iRes) => {
+    db.query(getIDR, (err, IDRRes) => {
         if(err) throw err;
 
-        // If the email doesn't exist, returns Delete = 0
-        if(iRes.length == 0) {
-            result.status(400).send({
-                "Delete": 0
-            });      
-        }
-        else {
-            let deleteInfo = "DELETE FROM `researchers` WHERE IDU='" + iRes[0].IDU + "';";
-
-            db.query(deleteInfo, (err, deleteRes) => {
-                if(err) throw err;
-
-                result.status(200).send({
-                    "Delete": 1
-                });
-
+        if(IDRRes.length == 0) {
+            result.status(404).send({
+                "message": "researcher not found"
             });
         }
+        else {
+            let idr = IDRRes[0].IDR;
 
+            let delete1 = "DELETE FROM `articleresearchers` WHERE IDR='" + idr + "';";
+
+            db.query(delete1, (err, d1Res) => {
+                if(err) throw err;
+
+                let delete2 = "DELETE FROM `projectresearchers` WHERE IDR='" + idr + "';";
+
+                db.query(delete2, (err, d2Res) => {
+                    if(err) throw err;
+
+                    let delete3 = "DELETE FROM `researchers` WHERE IDR='" + idr + "';";
+                    
+                    db.query(delete3, (err, d3Res) => {
+                        if(err) throw err;
+    
+                        result.status(200).send({
+                            "message": "deleted"
+                        });
+                    });
+                });
+            });
+        }
     });
-})
+});
 
 
 module.exports = router;

@@ -73,7 +73,7 @@ router.post('/add', (request, result) => {
                                         if(err) throw err;
             
                                         result.status(200).send({
-                                            "message": "inserted"
+                                            "message": "project inserted"
                                         }); 
                                     }); 
                                 }
@@ -178,4 +178,3 @@ router.delete('/delete', verify, (request, result) => {
 });
 
 module.exports = router;
-
