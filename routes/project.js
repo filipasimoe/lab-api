@@ -90,27 +90,42 @@ router.post('/add', (request, result) => {
     Returns Update = 1 if successfull, Update = 0 if not successfull
 */
 router.put('/edit', (request, result) => {
-    let title = request.body.title;
+    let IDP = request.body.IDP;
     let duration = request.body.duration;
     let context = request.body.context;
     let description = request.body.description;
     let year = request.body.year;
-    let IDP = request.body.IDP;
 
-    let update = "UPDATE `projects` SET `title`='" + title + "',`duration`='" + duration + "',`context`='" + context + "',`description`='" + description + "',`year`='" + year + "' WHERE IDP='" + IDP + "';";
+    // Gets all the original information
+    let getInfo = "SELECT * from projects WHERE IDP='" + IDP + "';";
 
-    db.query(update, (err, updateRes) => {
+    db.query(getInfo, (err, infoRes) => {
         if(err) throw err;
 
-        result.status(200).send({
-            "Update": 1
-        }); 
+        // If any of the information comes back empty, it's replaced by the original information
+        if(duration == null || duration == '') duration = infoRes[0].duration;
+        if(context == null || context == '') context = infoRes[0].context;
+        if(description == null || description == '') description = infoRes[0].description;
+        if(year == null || year == '') year = infoRes[0].year;
+
+        let update = "UPDATE `projects` SET `duration`='" + duration + "',`context`='" + context + "',`description`='" + description + "',`year`='" + year + "' WHERE IDP='" + IDP + "';";
+
+        db.query(update, (err, updateRes) => {
+            if(err) throw err;
+
+            let getIDU = "SELECT * from researchers WHERE IDR=(SELECT IDR from projectresearchers WHERE IDP='" + infoRes[0].IDP + "');"
+
+            db.query(getIDU, (err, getRes) => {
+                if(err) throw err;
+
+                result.status(200).send({
+                    "message": "updated"
+                }); 
+            });
+        });
     });
 });
 
-/*  Returns the information for one project
-    Receives email
-*/
 router.get('/info/:IDP', (request, result) => {
     let IDP = request.params.IDP;
 
@@ -139,10 +154,36 @@ router.get('/info/:IDP', (request, result) => {
     });
 });
 
+/*  Returns the information for one project
+    Receives email
+*/
+router.get('/from/:IDU', (request, result) => {
+    let IDU = request.params.IDU;
+
+    let getIDR = "SELECT * FROM researchers, users WHERE researchers.IDU = '" + IDU + "';";
+
+    db.query(getIDR, (err, getRes) => {
+        if(err) throw err;
+
+        if(getRes.length == 0) {
+            result.status(400).send({
+                "message": "researcher not found"
+            });      
+        }
+        else {
+            let info = "SELECT * FROM projects WHERE IDP=(SELECT IDP FROM projectresearchers WHERE projectresearchers.IDR = '" + getRes[0].IDR + "');"
+        
+            db.query(info, (err, infoRes) => {
+                result.status(200).send(infoRes);
+            })
+        }
+    });
+});
+
 /*  Returns all projects
 */
 router.get('/all', (request, result) => {
-    let getInfo = " SELECT projects.*, projectresearchers.IDR, researchers.name, users.email FROM projects, projectresearchers, researchers, users WHERE projects.IDP=projectresearchers.IDP AND projectresearchers.IDR = researchers.IDR AND researchers.idu=users.IDU;";
+    let getInfo = " SELECT projects.*, projectresearchers.IDR, researchers.name, users.email, users.IDU FROM projects, projectresearchers, researchers, users WHERE projects.IDP=projectresearchers.IDP AND projectresearchers.IDR = researchers.IDR AND researchers.idu=users.IDU;";
 
     db.query(getInfo, (err, getRes) => {
         if(err) throw err;
@@ -162,18 +203,36 @@ router.get('/all', (request, result) => {
 /*  Deletes the information for one researcher
     Receives email
 */
-router.delete('/delete', verify, (request, result) => {
-    let IDP = request.body.IDP;
+router.delete('/delete/:id', (request, result) => {
+    let id = request.params.id;
 
-    let deleteInfo = "DELETE FROM `projects` WHERE IDP='" + IDP + "';";
+    let getInfo = "SELECT * FROM `projects` WHERE IDP='" + id + "';";
 
-    db.query(deleteInfo, (err, deleteRes) => {
+    db.query(getInfo, (err, infoRes) => {
         if(err) throw err;
 
-        result.status(200).send({
-            "Delete": 1
-        });
+        if(infoRes.length == 0) {
+            result.status(404).send({
+                "message": "project not found"
+            });
+        }
+        else {
+            let delete1 = "DELETE FROM projectresearchers WHERE IDP='" + id + "';";
 
+            db.query(delete1, (err, d1Res) => {
+                if(err) throw err;
+
+                let delete2 = "DELETE FROM `projects` WHERE IDP='" + id + "';";
+
+                db.query(delete2, (err, d2Res) => {
+                    if(err) throw err;
+
+                    result.status(200).send({
+                        "message": "deleted"
+                    });
+                });
+            });
+        }
     });
 });
 

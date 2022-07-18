@@ -28,7 +28,7 @@ router.post('/register', async (request, result) => {
         if(res.length > 0) {
             // IDU 0 means error with register
             result.status(401).send({
-                "message": "unauthorized"
+                "message": "email is taken"
             });
         }
         // If user doesn't exist, hash the password and insert user in db

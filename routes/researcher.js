@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 
 const db = mySQL.createConnection({host: 'localhost', user: 'root', password: '', database: 'lab-app'});
 
-// Add researcher to db. Returns Insert = 1 if successfull, Insert = 0 if not successfull
+// Add researcher to db. 
 router.post('/add', (request, result) => {
     let name = request.body.name;
     let photo = request.body.photo;
@@ -53,6 +53,7 @@ router.post('/add', (request, result) => {
     }); 
 });
 
+
 /*  Updates researcher info
     Receives name, photo, bio, id
     Email can't be changed
@@ -75,9 +76,9 @@ router.put('/edit', (request, result) => {
             });      
         }
         else {
-            if(name == null) name = iRes[0].name;
-            if(bio == null) bio = iRes[0].bio;
-            if(role == null) role = iRes[0].role;
+            if(name == null || name == '') name = iRes[0].name;
+            if(bio == null || bio == '') bio = iRes[0].bio;
+            if(role == null || role == '') role = iRes[0].role;
 
             let update = "UPDATE `researchers` SET `name`='" + name + "',`bio`='" + bio + "', `role`='" + role + "' WHERE IDU='" + id + "';"
 
@@ -108,7 +109,7 @@ router.get('/info/:email', (request, result) => {
         // If the email doesn't exist, returns IDU = 0
         if(iRes.length == 0) {
             result.status(400).send({
-                "message": "user doesn't exist"
+                "message": "Não existe nenhuma conta de utilizador com esse email. Por favor crie primeiro uma conta de utilizador para poder registar o investigador associado."
             });      
         }
         else {
@@ -121,7 +122,7 @@ router.get('/info/:email', (request, result) => {
 
                 if(getRes.length == 0) {
                     result.status(200).send({
-                        "message": "no researcher with that email yet"
+                        "message": "Não existe nenhuma conta de utilizador com esse email. Por favor crie primeiro uma conta de utilizador para poder registar o investigador associado."
                     });      
                 }
                 else {
@@ -138,7 +139,6 @@ router.get('/info/:email', (request, result) => {
 });
 
 /*  Returns the information for one researcher
-    Receives email
 */
 router.get('/info/id/:id', (request, result) => {
     let IDU = request.params.id;
@@ -161,7 +161,6 @@ router.get('/info/id/:id', (request, result) => {
     });
 });
 
-
 /*  Returns all researchers
 */
 router.get('/all', (request, result) => {
@@ -183,7 +182,7 @@ router.get('/all', (request, result) => {
 });
 
 /*  Deletes the information for one researcher
-    Receives email
+    Receives id
 */
 router.delete('/delete/:id', (request, result) => {
     let id = request.params.id;

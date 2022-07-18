@@ -91,93 +91,52 @@ router.post('/add', (request, result) => {
     Receives name, photo, bio, ida
 */
 
-/*
-router.put('/edit', verify, (request, result) => {
-    let title = request.body.title;
+router.put('/edit', (request, result) => {
+    let IDA = request.body.IDA;
     let month = request.body.month;
     let year = request.body.year;
     let url = request.body.url;
     let authors = request.body.authors;
-    let email = request.body.email;
     let context = request.body.context;
+    let title = request.body.title;
 
-    // Get IDU from email
-    let getIDU = "SELECT IDU from users WHERE email='" + email + "';";
+    // Gets all the original information
+    let getInfo = "SELECT * from articles WHERE IDA='" + IDA + "';";
 
-    db.query(getIDU, (err, iRes) => {
+    db.query(getInfo, (err, infoRes) => {
         if(err) throw err;
 
-        // If the email doesn't exist
-        if(iRes.length == 0) {
-            result.status(400).send({
-                "message": "email doesn't exist"
-            });      
+        if(infoRes.length == 0) {
+            result.status(404).send({
+                "message": "article not found"
+            });
         }
+        else {
+            // If any of the information comes back empty, it's replaced by the original information
+            if(month == null || month == '') month = infoRes[0].month;
+            if(year == null || year == '') year = infoRes[0].year;
+            if(url == null || url == '') url = infoRes[0].url;
+            if(authors == null || authors == '') authors = infoRes[0].authors;
+            if(context == null || context == '') context = infoRes[0].context;
+            if(title == null || title == '') title = infoRes[0].title;
 
-        // Get IDR from IDU
-        let getIDR = "SELECT IDR from researchers WHERE IDU='" + iRes[0].IDU + "';";
+            let update = "UPDATE `articles` SET `title`='" + title + "',`month`='" + month + "',`year`='" + year + "',`url`='" + url + "',`authors`='" + authors + "',`context`='" + context + "' WHERE IDA='" + IDA + "';";
 
-        db.query(getIDR, (err, idrRes) => {
-            if(err) throw err;
+            db.query(update, (err, updateRed) => {
+                if(err) throw err;
 
-            // If the IDR doesn't exist
-            if(idrRes.length == 0) {
-                result.status(400).send({
-                    "message": "researcher doesn't exist"
-                });      
-            }
-            else {
-                let isTitle = "SELECT * FROM articles WHERE title='" + title + "';"
-
-                db.query(isTitle, (err, isTitleRes) => {
-                    if(err) throw err;
-
-                    if(isTitleRes.length == 0) {
-                        result.status(400).send({
-                            "message": "there's no publication with that name"
-                        }); 
-                    }
-
-                    else {
-                        let insert = "UPDATE `articles` SET `IDA`='" + isTitleRes[0].IDA + "',`title`='[value-2]',`month`='[value-3]',`year`='[value-4]',`url`='[value-5]',`authors`='[value-6]',`context`='[value-7]' WHERE 1;"
-                    
-                        db.query(insert, (err, insertRes) => {
-                            if(err) throw err;
-                            
-                            let getIDA = "SELECT IDA FROM articles WHERE title='" + title + "';"
-
-                            db.query(getIDA, (err, idaRes) => {
-                                if(err) throw err;
-
-                                if(idaRes.length == 0) {
-                                    result.status(400).send({
-                                        "message": "error"
-                                    }); 
-                                }
-                                else {
-                                    let insert = "INSERT INTO `articleresearchers`(`IDR`, `IDA`) VALUES ('" + idrRes[0].IDR + "','" + idaRes[0].IDA + "')";
-
-                                    db.query(insert, (err, insertRes) => {
-                                        if(err) throw err;
-                                
-                                        result.status(200).send({
-                                            "Insert": 1
-                                        }); 
-                                    }); 
-                                }
-                            });
-                        });
-                    }
-                })
-            }
-        });    
-    });
+                result.status(200).send({
+                    "message": "updated"
+                }); 
+            });
+        }
+    }); 
 });
-*/
-/*  Returns the information for one researcher
+
+/*  Returns the information for one publication
     Receives email
 */
-router.get('/info/:IDA', verify, (request, result) => {
+router.get('/info/:IDA', (request, result) => {
     let IDA = request.params.IDA;
 
     let getInfo = "SELECT * FROM articles WHERE IDA='" + IDA + "';";
@@ -188,28 +147,53 @@ router.get('/info/:IDA', verify, (request, result) => {
         // If the IDA doesn't exist, returns Get = 0
         if(getRes.length == 0) {
             result.status(400).send({
-                "Get": 0
+                "message": "article doens't exist"
             });      
         }
-
-        result.status(200).send({
-            "IDA": getRes[0].IDA,
-            "IDR": getRes[0].IDR,
-            "title": getRes[0].title,
-            "month": getRes[0].month,
-            "year": getRes[0].year,
-            "url": getRes[0].url
-        });
-
+        else {
+            result.status(200).send({
+                "IDA": getRes[0].IDA,
+                "IDR": getRes[0].IDR,
+                "title": getRes[0].title,
+                "month": getRes[0].month,
+                "year": getRes[0].year,
+                "url": getRes[0].url,
+                "context": getRes[0].context,
+                "authors": getRes[0].authors
+            });
+        }
     });
         
+});
+
+router.get('/from/:IDU', (request, result) => {
+    let IDU = request.params.IDU;
+    let getIDR = "SELECT * FROM researchers, users WHERE researchers.IDU = '" + IDU + "';";
+
+    db.query(getIDR, (err, getRes) => {
+        if(err) throw err;
+
+        if(getRes.length == 0) {
+            result.status(400).send({
+                "message": "researcher not found"
+            });      
+        }
+        else {
+            console.log(getRes[0].IDR)
+            let info = "SELECT * FROM articles WHERE IDA=(SELECT IDA FROM articleresearchers WHERE articleresearchers.IDR = '" + getRes[0].IDR + "');"
+        
+            db.query(info, (err, infoRes) => {
+                result.status(200).send(infoRes);
+            })
+        }
+    });
 });
 
 /*  Returns all articles
     Receives email
 */
 router.get('/all', (request, result) => {
-    let getInfo = "SELECT articles.* FROM articles, articleresearchers, researchers WHERE articleresearchers.IDA = articles.IDA AND articleresearchers.IDR=researchers.IDR;";
+    let getInfo = "SELECT articles.*, researchers.IDU FROM articles, articleresearchers, researchers WHERE articleresearchers.IDA = articles.IDA AND articleresearchers.IDR=researchers.IDR;";
 
     db.query(getInfo, (err, getRes) => {
         if(err) throw err;
@@ -230,20 +214,37 @@ router.get('/all', (request, result) => {
 /*  
 Deletes the information for one researcher
 */
-router.delete('/delete', verify, (request, result) => {
-    let IDA = request.body.IDA;
+router.delete('/delete/:id', (request, result) => {
+    let IDA = request.params.id;
 
-    let deleteInfo = "DELETE FROM `articles` WHERE IDA='" + IDA + "';";
+    let getInfo = "SELECT * FROM articles WHERE IDA='" + IDA + "';";
 
-    db.query(deleteInfo, (err, deleteRes) => {
+    db.query(getInfo, (err, infoRes) => {
         if(err) throw err;
 
-        result.status(200).send({
-            "Delete": 1
-        });
+        if(infoRes.length == 0) {
+            result.status(404).send({
+                "message": "article not found"
+            });
+        }
+        else {
+            let delete1 = "DELETE FROM articleresearchers WHERE IDA='" + IDA + "';";
 
+            db.query(delete1, (err, d1Res) => {
+                if(err) throw err;
+
+                let delete2 = "DELETE FROM `articles` WHERE IDA='" + IDA + "';";
+
+                db.query(delete2, (err, d2Res) => {
+                    if(err) throw err;
+
+                    result.status(200).send({
+                        "message": "deleted"
+                    });
+                });
+            });
+        }
     });
 });
 
 module.exports = router;
-

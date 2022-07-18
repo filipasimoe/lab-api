@@ -4,6 +4,9 @@ const dotenv = require('dotenv');
 const mySQL = require('mysql');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const port = 8000;
 
@@ -41,6 +44,15 @@ app.use('/api/researcher', researchRoute);
 app.use('/api/article', articleRoute);
 app.use('/api/project', projRoute);
 
+/*
 app.listen(port, () => {
     console.log(`rgpd-api listening at http://localhost:${port}`)
 });
+*/
+
+const sslServer = https.createServer({
+    key: fs.readFileSync(path.join(__dirname, 'cert', 'key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, 'cert', 'cert.pem'))
+  }, app);
+  
+  sslServer.listen(port, () => console.log(`Secure lab-api listening at https://localhost:${port}`));
