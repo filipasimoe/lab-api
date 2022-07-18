@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 05-Jul-2022 às 19:47
--- Versão do servidor: 10.4.22-MariaDB
--- versão do PHP: 7.4.27
+-- Tempo de geração: 09-Jul-2022 às 17:30
+-- Versão do servidor: 10.4.24-MariaDB
+-- versão do PHP: 7.4.29
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -33,24 +33,6 @@ CREATE TABLE `articleresearchers` (
   `IDR` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Extraindo dados da tabela `articleresearchers`
---
-
-INSERT INTO `articleresearchers` (`IDAR`, `IDA`, `IDR`) VALUES
-(1, 0, 17),
-(2, 4, 17),
-(3, 5, 17),
-(4, 6, 17),
-(5, 7, 17),
-(6, 8, 17),
-(7, 9, 17),
-(8, 0, 17),
-(9, 0, 17),
-(10, 0, 17),
-(11, 0, 17),
-(12, 0, 17);
-
 -- --------------------------------------------------------
 
 --
@@ -67,17 +49,6 @@ CREATE TABLE `articles` (
   `context` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Extraindo dados da tabela `articles`
---
-
-INSERT INTO `articles` (`IDA`, `title`, `month`, `year`, `url`, `authors`, `context`) VALUES
-(1, '5Generative Adversarial Graph Convolutional Networks for Human Action Synthesis', 11, 2012, 'https://www.di.ubi.pt/~jcneves/publications.html', 'Bruno Degardin, João Neves, Vasco Lopes, João Brito, Ehsan Yaghoubi and Hugo Proença', 'IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)'),
-(2, '1Generative Adversarial Graph Convolutional Networks for Human Action Synthesis', 11, 2012, 'https://www.di.ubi.pt/~jcneves/publications.html', 'Bruno Degardin, João Neves, Vasco Lopes, João Brito, Ehsan Yaghoubi and Hugo Proença', 'IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)'),
-(3, '2Generative Adversarial Graph Convolutional Networks for Human Action Synthesis', 11, 2012, 'https://www.di.ubi.pt/~jcneves/publications.html', 'Bruno Degardin, João Neves, Vasco Lopes, João Brito, Ehsan Yaghoubi and Hugo Proença', 'IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)'),
-(4, '3Generative Adversarial Graph Convolutional Networks for Human Action Synthesis', 11, 2012, 'https://www.di.ubi.pt/~jcneves/publications.html', 'Bruno Degardin, João Neves, Vasco Lopes, João Brito, Ehsan Yaghoubi and Hugo Proença', 'IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)'),
-(5, '4Generative Adversarial Graph Convolutional Networks for Human Action Synthesis', 11, 2012, 'https://www.di.ubi.pt/~jcneves/publications.html', 'Bruno Degardin, João Neves, Vasco Lopes, João Brito, Ehsan Yaghoubi and Hugo Proença', 'IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)');
-
 -- --------------------------------------------------------
 
 --
@@ -89,17 +60,6 @@ CREATE TABLE `projectresearchers` (
   `IDR` int(11) NOT NULL,
   `IDP` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Extraindo dados da tabela `projectresearchers`
---
-
-INSERT INTO `projectresearchers` (`IDPR`, `IDR`, `IDP`) VALUES
-(44, 17, 56),
-(45, 17, 57),
-(46, 17, 58),
-(47, 17, 59),
-(48, 17, 60);
 
 -- --------------------------------------------------------
 
@@ -116,17 +76,6 @@ CREATE TABLE `projects` (
   `year` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Extraindo dados da tabela `projects`
---
-
-INSERT INTO `projects` (`IDP`, `title`, `duration`, `context`, `description`, `year`) VALUES
-(56, '2InovFarmer.MED - Improving Mediterranean Supply Chain through Innovative Agro-food Business Models to Strengthen Small-scale Farmers Competitiveness', 1, ' International project funded by Partnership for Research and Innovation in the Mediterranean Area (PRIMA)', ' InovFarmer.MED aims to improve Mediterranean supply chain by promoting the adoption of innovative and sustainable Business models and partnership on the agro-food systems, providing strategies and digital technologies to cope with any crisis. InovFarmer.MED is expected to improve the two study case agri-food value chain products, valorizing Fig and Prickly Pear, by enabling the adoption of adapted Digital technologies that pave the way for a smart agri-food supply chain linking farmers/producers to food processing and retail in three piloting sites - Portugal, Algeria and Egypt.', 20022),
-(57, '3InovFarmer.MED - Improving Mediterranean Supply Chain through Innovative Agro-food Business Models to Strengthen Small-scale Farmers Competitiveness', 1, ' International project funded by Partnership for Research and Innovation in the Mediterranean Area (PRIMA)', ' InovFarmer.MED aims to improve Mediterranean supply chain by promoting the adoption of innovative and sustainable Business models and partnership on the agro-food systems, providing strategies and digital technologies to cope with any crisis. InovFarmer.MED is expected to improve the two study case agri-food value chain products, valorizing Fig and Prickly Pear, by enabling the adoption of adapted Digital technologies that pave the way for a smart agri-food supply chain linking farmers/producers to food processing and retail in three piloting sites - Portugal, Algeria and Egypt.', 20022),
-(58, '4InovFarmer.MED - Improving Mediterranean Supply Chain through Innovative Agro-food Business Models to Strengthen Small-scale Farmers Competitiveness', 1, ' International project funded by Partnership for Research and Innovation in the Mediterranean Area (PRIMA)', ' InovFarmer.MED aims to improve Mediterranean supply chain by promoting the adoption of innovative and sustainable Business models and partnership on the agro-food systems, providing strategies and digital technologies to cope with any crisis. InovFarmer.MED is expected to improve the two study case agri-food value chain products, valorizing Fig and Prickly Pear, by enabling the adoption of adapted Digital technologies that pave the way for a smart agri-food supply chain linking farmers/producers to food processing and retail in three piloting sites - Portugal, Algeria and Egypt.', 20022),
-(59, '5InovFarmer.MED - Improving Mediterranean Supply Chain through Innovative Agro-food Business Models to Strengthen Small-scale Farmers Competitiveness', 1, ' International project funded by Partnership for Research and Innovation in the Mediterranean Area (PRIMA)', ' InovFarmer.MED aims to improve Mediterranean supply chain by promoting the adoption of innovative and sustainable Business models and partnership on the agro-food systems, providing strategies and digital technologies to cope with any crisis. InovFarmer.MED is expected to improve the two study case agri-food value chain products, valorizing Fig and Prickly Pear, by enabling the adoption of adapted Digital technologies that pave the way for a smart agri-food supply chain linking farmers/producers to food processing and retail in three piloting sites - Portugal, Algeria and Egypt.', 20022),
-(60, '6InovFarmer.MED - Improving Mediterranean Supply Chain through Innovative Agro-food Business Models to Strengthen Small-scale Farmers Competitiveness', 1, ' International project funded by Partnership for Research and Innovation in the Mediterranean Area (PRIMA)', ' InovFarmer.MED aims to improve Mediterranean supply chain by promoting the adoption of innovative and sustainable Business models and partnership on the agro-food systems, providing strategies and digital technologies to cope with any crisis. InovFarmer.MED is expected to improve the two study case agri-food value chain products, valorizing Fig and Prickly Pear, by enabling the adoption of adapted Digital technologies that pave the way for a smart agri-food supply chain linking farmers/producers to food processing and retail in three piloting sites - Portugal, Algeria and Egypt.', 20022);
-
 -- --------------------------------------------------------
 
 --
@@ -142,16 +91,6 @@ CREATE TABLE `researchers` (
   `role` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Extraindo dados da tabela `researchers`
---
-
-INSERT INTO `researchers` (`IDR`, `IDU`, `name`, `photo`, `bio`, `role`) VALUES
-(17, 1, 'Daniela Martins', 'person.jpg', 'A Daniela estudou na UBI e gosta de aviões', 'CEO'),
-(19, 2, 'Filipa Barreiro', 'team1.jpg', 'A Filipa estudou na UBI e gosta de dançar', 'CTO'),
-(21, 3, 'Helena Simões', 'person.jpg', 'A Helena estudou no IPL e gosta da Filipa', 'CFO'),
-(22, 4, 'Simão Simões', 'team1.jpg', 'O Simão gosta de limão', 'HR');
-
 -- --------------------------------------------------------
 
 --
@@ -166,16 +105,6 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Extraindo dados da tabela `users`
---
-
-INSERT INTO `users` (`IDU`, `email`, `password`, `isAdmin`) VALUES
-(1, 'daniela@gmail.com', '$2a$10$J1b59y14fAgtnumbPiYWbuapwv8n5YDraT63MvcBDgyyqFCZe.m3q', 1),
-(2, 'filipa@gmail.com', '$2a$10$yqPDcS9yp0rBCZTBdakm1epV2rVhHWGl0eIGgzwRsaAzYeoF1fOhK', 1),
-(3, 'helena@gmail.com', '$2a$10$GFJ6Ca1IRxWS1Qadw29kIeFl.fHSlkUGDXyERS.psiSdNeHBHnTIW', 0),
-(4, 'simoes@gmail.com', '$2a$10$T00E9Iq8Psk0YgD6r7dGvulJ2J6DSXnPN.BSK5AZd/TcvvHHZm15C', 0);
-
---
 -- Índices para tabelas despejadas
 --
 
@@ -183,7 +112,9 @@ INSERT INTO `users` (`IDU`, `email`, `password`, `isAdmin`) VALUES
 -- Índices para tabela `articleresearchers`
 --
 ALTER TABLE `articleresearchers`
-  ADD PRIMARY KEY (`IDAR`);
+  ADD PRIMARY KEY (`IDAR`),
+  ADD KEY `IDR` (`IDR`),
+  ADD KEY `IDA` (`IDA`);
 
 --
 -- Índices para tabela `articles`
@@ -195,7 +126,9 @@ ALTER TABLE `articles`
 -- Índices para tabela `projectresearchers`
 --
 ALTER TABLE `projectresearchers`
-  ADD PRIMARY KEY (`IDPR`);
+  ADD PRIMARY KEY (`IDPR`),
+  ADD KEY `IDR` (`IDR`),
+  ADD KEY `IDP` (`IDP`);
 
 --
 -- Índices para tabela `projects`
@@ -259,6 +192,20 @@ ALTER TABLE `users`
 --
 -- Restrições para despejos de tabelas
 --
+
+--
+-- Limitadores para a tabela `articleresearchers`
+--
+ALTER TABLE `articleresearchers`
+  ADD CONSTRAINT `articleresearchers_ibfk_1` FOREIGN KEY (`IDR`) REFERENCES `researchers` (`IDR`),
+  ADD CONSTRAINT `articleresearchers_ibfk_2` FOREIGN KEY (`IDA`) REFERENCES `articles` (`IDA`);
+
+--
+-- Limitadores para a tabela `projectresearchers`
+--
+ALTER TABLE `projectresearchers`
+  ADD CONSTRAINT `projectresearchers_ibfk_1` FOREIGN KEY (`IDR`) REFERENCES `researchers` (`IDR`),
+  ADD CONSTRAINT `projectresearchers_ibfk_2` FOREIGN KEY (`IDP`) REFERENCES `projects` (`IDP`);
 
 --
 -- Limitadores para a tabela `researchers`
